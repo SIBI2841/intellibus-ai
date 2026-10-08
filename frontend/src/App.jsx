@@ -1,9 +1,9 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CameraAI from "./CameraAI";
 import LiveMap from "./LiveMap";
 import OperationsInsights from "./OperationsInsights";
 
-const API = "/api";
+const API = "https://intellibus-ai-backend.onrender.com/api";
 
 async function get(path) {
   const r = await fetch(`${API}${path}`);
@@ -221,7 +221,7 @@ function App() {
           <p className="recommendation">{prediction.recommendation}</p>
           <div className="route">
             <span>{prediction.current_stop}</span>
-            <b>→</b>
+            <b>?</b>
             <span>{prediction.next_stop}</span>
           </div>
         </article>
@@ -305,7 +305,7 @@ function App() {
       </section>
 
       <footer>
-        Hackathon prototype · Synthetic demo data · No real vehicle control
+        Hackathon prototype � Synthetic demo data � No real vehicle control
       </footer>
     </main>
   );
