@@ -10,8 +10,39 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-const ROUTE_START = [11.0168, 76.9558];
-const ROUTE_END = [11.0183, 76.9725];
+// Approximate illustrative coordinates for the Coimbatore demo.
+// These are not verified bus-stop GPS coordinates.
+const STOP_COORDINATES = {
+  "Gandhipuram": [11.0183, 76.9725],
+  "Town Hall": [10.9950, 76.9614],
+  "Ukkadam": [10.9880, 76.9590],
+  "Railway Station": [10.9965, 76.9660],
+  "Lakshmi Mills": [11.0090, 76.9780],
+  "Peelamedu": [11.0260, 77.0120],
+  "Hope College": [11.0450, 77.0270],
+  "PSG Tech": [11.0240, 77.0020],
+  "Airport": [11.0300, 77.0430],
+  "Singanallur": [11.0000, 77.0280],
+  "Saibaba Colony": [11.0250, 76.9470],
+  "Brookefields": [11.0020, 76.9670],
+  "Coimbatore Medical College": [11.0280, 77.0200],
+  "Uppilipalayam": [11.0050, 76.9840],
+  "Ganapathy": [11.0430, 76.9940],
+  "Saravanampatti": [11.0800, 77.0050],
+};
+
+const ROUTE_START = STOP_COORDINATES["Gandhipuram"];
+const ROUTE_END = STOP_COORDINATES["Hope College"];
+
+function makeFallbackRoute(start, end) {
+  return Array.from({ length: 10 }, (_, i) => {
+    const t = i / 9;
+    return [
+      start[0] + (end[0] - start[0]) * t,
+      start[1] + (end[1] - start[1]) * t,
+    ];
+  });
+}
 
 const FALLBACK_ROUTE = [
   [11.0168, 76.9558],
@@ -116,8 +147,15 @@ export default function LiveMap({
   gps,
   gpsZoneId = "school-01",
   gpsSpeed = 42,
+  settings = {},
 }) {
-  const [roadRoute, setRoadRoute] = useState(FALLBACK_ROUTE);
+  const routeStartName = settings.routeStart || "Gandhipuram";
+  const routeEndName = settings.routeEnd || "Hope College";
+  const startPoint = STOP_COORDINATES[routeStartName] || ROUTE_START;
+  const endPoint = STOP_COORDINATES[routeEndName] || ROUTE_END;
+  const busId = settings.busId || "{busId}";
+
+  const [roadRoute, setRoadRoute] = useState(() => makeFallbackRoute(startPoint, endPoint));
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -125,8 +163,8 @@ export default function LiveMap({
 
     async function loadRoadRoute() {
       try {
-        const start = `${ROUTE_START[1]},${ROUTE_START[0]}`;
-        const end = `${ROUTE_END[1]},${ROUTE_END[0]}`;
+        const start = `${startPoint[1]},${startPoint[0]}`;
+        const end = `${endPoint[1]},${endPoint[0]}`;
 
         const response = await fetch(
           `https://router.project-osrm.org/route/v1/driving/${start};${end}?overview=full&geometries=geojson`
@@ -150,7 +188,7 @@ export default function LiveMap({
         }
       } catch {
         if (!cancelled) {
-          setRoadRoute(FALLBACK_ROUTE);
+          setRoadRoute(makeFallbackRoute(startPoint, endPoint));
         }
       }
     }
@@ -160,7 +198,11 @@ export default function LiveMap({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [routeStartName, routeEndName]);
+
+  useEffect(() => {
+    setProgress(0);
+  }, [routeStartName, routeEndName]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -204,10 +246,11 @@ export default function LiveMap({
   return (
     <section className="card live-map-card">
       <div className="card-title">LIVE BUS TRACKING</div>
+      <div className="map-route-label">Demo route: {routeStartName} ? {routeEndName}</div>
 
       <div className="live-map-header">
         <div>
-          <div className="live-map-title">TN-38-AB-1234</div>
+          <div className="live-map-title">{busId}</div>
           <div className="live-map-subtitle">
             Simulated GPS telemetry · Road-following route
           </div>
@@ -227,8 +270,9 @@ export default function LiveMap({
 
       <div className="live-map">
         <MapContainer
-          center={[11.018, 76.963]}
-          zoom={14}
+          key={`${routeStartName}-${routeEndName}`}
+          center={[(startPoint[0] + endPoint[0]) / 2, (startPoint[1] + endPoint[1]) / 2]}
+          zoom={13}
           scrollWheelZoom={true}
           attributionControl={true}
         >
@@ -266,7 +310,7 @@ export default function LiveMap({
 
           <Marker position={position} icon={busIcon}>
             <Popup>
-              <strong>TN-38-AB-1234</strong>
+              <strong>{busId}</strong>
               <br />
               Speed: {gpsSpeed} km/h
               <br />
@@ -305,8 +349,7 @@ export default function LiveMap({
       </div>
 
       <div className="map-note">
-        Road route generated from OpenStreetMap routing data.
-        GPS movement is simulated for the hackathon demonstration.
+        Selected-stop coordinates are illustrative demo approximations. Road routing uses OpenStreetMap routing data when available; GPS movement is simulated for this hackathon demonstration.
       </div>
     </section>
   );

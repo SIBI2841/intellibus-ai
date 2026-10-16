@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
-import CameraAI from "./CameraAI";
+﻿import { lazy, Suspense, useEffect, useState } from "react";
+const CameraAI = lazy(() => import("./CameraAI"));
 import LiveMap from "./LiveMap";
 import OperationsInsights from "./OperationsInsights";
+import SettingsPanel from "./SettingsPanel";
+import HardwareIoT from "./HardwareIoT";
 
 const API = "https://intellibus-ai-backend.onrender.com/api";
 
@@ -35,6 +37,29 @@ function App() {
   const [gpsZoneId, setGpsZoneId] = useState("school-01");
   const [gpsSpeed, setGpsSpeed] = useState(42);
   const [error, setError] = useState("");
+  const [settings, setSettings] = useState(() => {
+    const defaults = {
+      busId: "TN-38-AB-1234",
+      capacity: 60,
+      routeStart: "Gandhipuram",
+      routeEnd: "Hope College",
+      speedLimit: 40,
+      alertThreshold: 85,
+      theme: "dark",
+    };
+    try {
+      return { ...defaults, ...JSON.parse(localStorage.getItem("intellibus-settings") || "{}") };
+    } catch {
+      return defaults;
+    }
+  });
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("dashboard");
+
+  useEffect(() => {
+    document.documentElement.dataset.intellibusTheme = settings.theme || "dark";
+    localStorage.setItem("intellibus-settings", JSON.stringify(settings));
+  }, [settings]);
 
   async function refresh() {
     try {
@@ -124,9 +149,30 @@ function App() {
           <div className="eyebrow">INTELLIBUS AI</div>
           <h1>Transport Operations Dashboard</h1>
         </div>
-        <div className="bus-id">{bus.bus_id}</div>
+        <div className="topbar-actions"><div className="bus-id">{bus.bus_id}</div><button className="settings-trigger" onClick={() => setSettingsOpen(true)}><span>⚙</span> Settings</button></div>
       </header>
 
+      <nav className="app-tabs" aria-label="Application sections">
+        <button
+          type="button"
+          className={activeTab === "dashboard" ? "app-tab active" : "app-tab"}
+          aria-current={activeTab === "dashboard" ? "page" : undefined}
+          onClick={() => setActiveTab("dashboard")}
+        >
+          <span aria-hidden="true">?</span> Operations Dashboard
+        </button>
+        <button
+          type="button"
+          className={activeTab === "hardware" ? "app-tab active" : "app-tab"}
+          aria-current={activeTab === "hardware" ? "page" : undefined}
+          onClick={() => setActiveTab("hardware")}
+        >
+          <span aria-hidden="true">?</span> Hardware &amp; IoT
+        </button>
+      </nav>
+
+      {activeTab === "dashboard" && (
+        <>
       {operations && (
         <section className={`operations-banner ${operations.overall_status.toLowerCase()}`}>
           <div>
@@ -242,11 +288,13 @@ function App() {
           )}
         </article>
 
-        <CameraAI
-          busPassengers={bus.passengers}
-          capacity={bus.capacity}
-          onVerificationChange={setCameraVerification}
-        />
+        <Suspense fallback={<article className="card"><p>Loading Camera AI module...</p></article>}>
+          <CameraAI
+            busPassengers={bus.passengers}
+            capacity={bus.capacity}
+            onVerificationChange={setCameraVerification}
+          />
+        </Suspense>
         <article className="card gps-card">
           <div className="card-title">GPS SAFETY ZONE</div>
 
@@ -304,14 +352,25 @@ function App() {
         </article>
       </section>
 
+        </>
+      )}
+
+      {activeTab === "hardware" && (
+        <HardwareIoT settings={settings} gps={gps} bus={bus} />
+      )}
+
+      {settingsOpen && <SettingsPanel initialSettings={settings} onSave={setSettings} onClose={() => setSettingsOpen(false)} />}
       <footer>
-        Hackathon prototype � Synthetic demo data � No real vehicle control
+        Hackathon prototype · Synthetic demo data · No real vehicle control
       </footer>
     </main>
   );
 }
 
 export default App;
+
+
+
 
 
 
