@@ -1,0 +1,159 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  color-scheme: dark;
+  --glass-bg: rgba(19, 30, 49, .66);
+  --glass-border: rgba(255, 255, 255, .13);
+  --glass-highlight: rgba(255, 255, 255, .07);
+  --glass-text: #f4f7ff;
+  --glass-muted: #9baac2;
+  --glass-cyan: #72e3f5;
+  --glass-blue: #7da7ff;
+}
+
+html {
+  background: #080e1a;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  color: var(--glass-text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(54, 107, 190, .25), transparent 42%),
+    radial-gradient(ellipse at 90% 12%, rgba(41, 194, 211, .13), transparent 35%),
+    linear-gradient(145deg, #080e1a 0%, #0b1424 52%, #101b2d 100%);
+  background-attachment: fixed;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+button:hover {
+  border-color: rgba(130, 211, 255, .48) !important;
+  box-shadow: 0 5px 24px rgba(45, 135, 255, .12);
+}
+
+button:active {
+  transform: scale(.985);
+}
+
+a {
+  color: var(--glass-cyan);
+}
+
+::selection {
+  color: white;
+  background: rgba(78, 157, 255, .42);
+}
+
+/* Glass treatment for common dashboard surfaces */
+[class*="card"],
+[class*="panel"],
+[class*="widget"],
+[class*="tile"],
+[class*="insight"],
+[class*="metric"],
+[class*="stat-card"],
+[class*="section-card"] {
+  border-color: var(--glass-border) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .07),
+    0 14px 42px rgba(0, 0, 0, .17);
+}
+
+[class*="card"]:not([class*="map"]),
+[class*="panel"],
+[class*="widget"],
+[class*="tile"],
+[class*="insight"],
+[class*="metric"],
+[class*="stat-card"],
+[class*="section-card"] {
+  background-color: rgba(22, 34, 54, .62);
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+  border-radius: 20px;
+}
+
+/* Navigation and headers */
+header, nav, [class*="navbar"], [class*="topbar"], [class*="sidebar"] {
+  border-color: rgba(255, 255, 255, .1);
+}
+
+[class*="navbar"], [class*="topbar"] {
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  background-color: rgba(9, 17, 30, .68);
+}
+
+/* Buttons */
+button, [role="button"] {
+  border-radius: 12px;
+}
+
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--glass-cyan);
+  outline-offset: 3px;
+}
+
+/* Form controls */
+input, select, textarea {
+  color: var(--glass-text);
+  background: rgba(7, 14, 26, .62);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 12px;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(114, 227, 245, .65);
+  box-shadow: 0 0 0 3px rgba(114, 227, 245, .1);
+}
+
+/* Elegant headings and subdued secondary labels */
+h1, h2, h3, h4 {
+  letter-spacing: -.035em;
+}
+
+small, [class*="subtitle"], [class*="muted"], [class*="caption"] {
+  color: var(--glass-muted);
+}
+
+/* Keep maps and camera previews functional and visually crisp */
+.leaflet-container, video, canvas {
+  border-radius: 16px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [class*="card"], [class*="panel"], [class*="widget"], [class*="tile"] {
+    transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+  }
+
+  [class*="card"]:hover, [class*="panel"]:hover, [class*="widget"]:hover {
+    border-color: rgba(114, 227, 245, .24) !important;
+  }
+}
+
+@media (max-width: 700px) {
+  [class*="card"], [class*="panel"], [class*="widget"], [class*="tile"] {
+    border-radius: 16px;
+  }
+
+  body {
+    background-attachment: scroll;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [class*="card"], [class*="panel"], [class*="widget"], [class*="tile"] {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: #152238;
+  }
+}
